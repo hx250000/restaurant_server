@@ -80,6 +80,18 @@ public class UserService {
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("用户不存在或已删除！"));
 
+        if (!existingUser.getUsername().equals(updatedUser.getUsername())) {
+            // 检查新的用户名是否已存在
+            if (userRepository.existsByUsername(updatedUser.getUsername())) {
+                throw new ResourceConflictException("用户名已存在！");
+            }
+        }
+        if (!existingUser.getPhone().equals(updatedUser.getPhone())) {
+            // 检查新的手机号是否已存在
+            if (userRepository.existsByPhone(updatedUser.getPhone())) {
+                throw new ResourceConflictException("手机号已被注册！");
+            }
+        }
         // 更新字段
         existingUser.setUsername(updatedUser.getUsername());
         existingUser.setPassword(encryptPassword(updatedUser.getPassword()));

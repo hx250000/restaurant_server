@@ -12,14 +12,17 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
+    @Query("SELECT u FROM User u WHERE u.isDeleted = 0")
+    List<User> findAll();
 
+    @Query("SELECT u FROM User u WHERE u.username = :username AND u.isDeleted = 0")
     Optional<User> findByUsername(String username);
 
+    @Query("SELECT u FROM User u WHERE u.id = :id AND u.isDeleted = 0")
     Optional<User> findById(Long id);
 
     @Query("SELECT u FROM User u WHERE u.username LIKE CONCAT('%', :keyword, '%') AND u.isDeleted = 0")
     List<User> findByUserNameKeyword(@Param("keyword") String keyword);
-
 
     boolean existsByPhone(String phone);
 
