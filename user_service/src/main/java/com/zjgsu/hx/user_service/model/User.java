@@ -21,9 +21,6 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-//    /** 邮箱（唯一） */
-//    @Column(unique = true, nullable = false)
-//    private String email;
     /** 电话号码（唯一） */
     @Column(unique = true, nullable = false)
     private String phone;
@@ -50,5 +47,10 @@ public class User {
         this.createTime = LocalDateTime.now();
         this.updateTime = LocalDateTime.now();
         this.isDeleted = 0;
+    }
+
+    @PreUpdate
+    public void onUpdate() {
+        this.updateTime = LocalDateTime.now();
     }
 }

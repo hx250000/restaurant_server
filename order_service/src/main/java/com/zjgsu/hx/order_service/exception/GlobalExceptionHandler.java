@@ -1,6 +1,6 @@
-package com.zjgsu.hx.user_service.exception;
+package com.zjgsu.hx.order_service.exception;
 
-import com.zjgsu.hx.user_service.common.ApiResponse;
+import com.zjgsu.hx.order_service.common.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

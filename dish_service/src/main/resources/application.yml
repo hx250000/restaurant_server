@@ -5,3 +5,14 @@ spring:
   application:
     name: dish_service
 
+  datasource:
+    url: jdbc:mysql://localhost:3306/restaurant_dish?useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    open-in-view: false

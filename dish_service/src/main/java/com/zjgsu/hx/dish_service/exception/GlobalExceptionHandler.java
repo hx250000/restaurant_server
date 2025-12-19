@@ -1,6 +1,6 @@
-package com.zjgsu.hx.user_service.exception;
+package com.zjgsu.hx.dish_service.exception;
 
-import com.zjgsu.hx.user_service.common.ApiResponse;
+import com.zjgsu.hx.dish_service.common.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -42,13 +42,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(ApiResponse.badRequest(ex.getMessage()));
-    }
-
-    @ExceptionHandler
-    public ResponseEntity<ApiResponse<Void>> handleUnauthorizedException(UnauthorizedException ex) {
-        return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED)
-                .body(ApiResponse.unauthorized(ex.getMessage()));
     }
     /**
      * 处理资源冲突异常

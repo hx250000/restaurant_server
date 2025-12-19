@@ -2,6 +2,7 @@ package com.zjgsu.hx.user_service.controller;
 
 import com.zjgsu.hx.user_service.common.ApiResponse;
 import com.zjgsu.hx.user_service.model.User;
+import com.zjgsu.hx.user_service.model.frontend.UserLogin;
 import com.zjgsu.hx.user_service.model.frontend.UserRegister;
 import com.zjgsu.hx.user_service.service.UserService;
 import jakarta.annotation.Resource;
@@ -68,6 +69,15 @@ public class UserController {
             @PathVariable Long id,
             @RequestBody UserRegister userRegister) {
         return ApiResponse.success(userService.updateUser(id, userRegister));
+    }
+
+    /**
+     * 用户登录
+     */
+    @PostMapping("/login")
+    public ApiResponse<User> login(
+            @RequestBody UserLogin userLogin) {
+        return ApiResponse.success(userService.authenticateUser(userLogin));
     }
 
     /**

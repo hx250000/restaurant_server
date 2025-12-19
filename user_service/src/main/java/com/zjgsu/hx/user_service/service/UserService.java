@@ -2,11 +2,13 @@ package com.zjgsu.hx.user_service.service;
 
 import com.zjgsu.hx.user_service.exception.ResourceConflictException;
 import com.zjgsu.hx.user_service.exception.ResourceNotFoundException;
+import com.zjgsu.hx.user_service.exception.UnauthorizedException;
 import com.zjgsu.hx.user_service.model.User;
-import com.zjgsu.hx.user_service.model.UserRole;
+import com.zjgsu.hx.user_service.model.frontend.UserLogin;
 import com.zjgsu.hx.user_service.model.frontend.UserRegister;
 import com.zjgsu.hx.user_service.repository.UserRepository;
-import jakarta.annotation.Resource;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -16,7 +18,7 @@ import java.util.Optional;
 @Service
 public class UserService {
 
-    @Resource
+    @Autowired
     private UserRepository userRepository;
 
     public List<User> findAll() {
@@ -37,6 +39,7 @@ public class UserService {
         return userRepository.findByUserNameKeyword(keyword);
     }
 
+    @Transactional
     public User register(UserRegister userReg) {
         Optional<User> user= userRepository.findByUsername(userReg.getUsername());
         User newUser = new User();
@@ -76,6 +79,7 @@ public class UserService {
         return userRepository.save(newUser);
     }
 
+    @Transactional
     public User updateUser(Long id, UserRegister updatedUser) {
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("用户不存在或已删除！"));
@@ -103,12 +107,24 @@ public class UserService {
         return userRepository.save(existingUser);
     }
 
+    @Transactional
     public User deleteUserById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("用户不存在或已删除！"));
         user.setIsDeleted(1);
         user.setUpdateTime(LocalDateTime.now());
         return userRepository.save(user);
+    }
+
+    public User authenticateUser(UserLogin userLogin) {
+        String username = userLogin.getUsername();
+        String password = userLogin.getPassword();
+        String encryptedPassword = encryptPassword(password);
+        User user = userRepository.findUserByUsernameAndPassword(username, encryptedPassword);
+        if (user == null) {
+            throw new UnauthorizedException("用户名或密码错误，登录失败！");
+        }
+        return user;
     }
 
     public String encryptPassword(String password) {

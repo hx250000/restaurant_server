@@ -1,4 +1,4 @@
-package com.zjgsu.hx.user_service.common;
+package com.zjgsu.hx.dish_service.common;
 
 import java.time.LocalDateTime;
 
@@ -45,11 +45,6 @@ public class ApiResponse<T> {
     // 客户端错误
     public static <T> ApiResponse<T> badRequest(String message) {
         return new ApiResponse<>(400, message, null);
-    }
-
-    // 未认证
-    public static <T> ApiResponse<T> unauthorized(String message) {
-        return new ApiResponse<>(401, message, null);
     }
 
     // 未找到
