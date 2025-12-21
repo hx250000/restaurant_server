@@ -25,6 +25,14 @@ public class DishController {
     }
 
     /**
+     * 根据ID查询
+     */
+    @GetMapping("/{id}")
+    public ApiResponse<Dish> getDishById(@PathVariable Long id) {
+        return ApiResponse.success(dishService.getDishById(id));
+    }
+
+    /**
      * 根据菜品名查询
      */
     @GetMapping("/name/{name}")

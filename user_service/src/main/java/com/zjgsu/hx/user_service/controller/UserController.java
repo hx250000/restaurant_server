@@ -39,7 +39,7 @@ public class UserController {
     /**
      * 根据用户名查询（查不到不报错）
      */
-    @GetMapping("/user")
+    @GetMapping("/user/{username}")
     public ApiResponse<User> findByUsername(@RequestParam String username) {
         User user = userService.findByUsername(username);
         return ApiResponse.success(user); // 可能为 null

@@ -21,6 +21,13 @@ public class DishService {
         return dishRepository.findByStatus(1);
     }
 
+    // 根据ID查询菜品，查不到时抛出异常
+    public Dish getDishById(Long id) {
+        return dishRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("菜品不存在或已删除！"));
+    }
+
+    // 根据名称查询菜品，查不到时返回null，（前端显示为空但不报错）
     public Dish getDishByName(String name) {
         return dishRepository.findByDishname(name).orElse(null);
     }
@@ -113,7 +120,7 @@ public class DishService {
         Dish dish = dishRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("菜品不存在或已删除！"));
         if(dish.getStock()<reduceStock){
-            throw new IllegalArgumentException("库存不足，无法减少库存！");
+            throw new IllegalArgumentException("库存不足！");
         }
         dish.setStock(dish.getStock()-reduceStock);
         return dishRepository.save(dish);

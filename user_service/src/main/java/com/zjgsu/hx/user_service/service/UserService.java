@@ -25,11 +25,13 @@ public class UserService {
         return userRepository.findAll();
     }
 
+    // 根据id，查不到用户时抛出异常
     public User findById(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("用户不存在或已删除！"));
     }
 
+    // 根据username，查不到用户时返回 null（前端显示为空但不报错）
     public User findByUsername(String username) {
         return userRepository.findByUsername(username).orElse(null);
                 //.orElseThrow(() -> new ResourceNotFoundException("用户未找到！"));
