@@ -10,3 +10,16 @@ spring:
       ddl-auto: update
     show-sql: true
     open-in-view: false
+
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+        namespace: public
+        group: RESTAURANT_GROUP
+        ephemeral: true
+        heart-beat-interval: 5000
+        heart-beat-timeout: 15000
+        username: nacos
+        password: nacos
+        enabled: true

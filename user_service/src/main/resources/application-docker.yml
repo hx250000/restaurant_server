@@ -1,7 +1,27 @@
-server:
-  port: 8081
-
 spring:
-  application:
-    name: user_service
+  datasource:
+    url: jdbc:mysql://r-user-db:3306/restaurant_user?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    open-in-view: false
+
+  cloud:
+    nacos:
+      discovery:
+        server-addr: nacos:8848
+        namespace: public
+        group: RESTAURANT_GROUP
+        ephemeral: true
+        heart-beat-interval: 5000
+        heart-beat-timeout: 15000
+        username: nacos
+        password: nacos
+        enabled: true
+
 

@@ -2,6 +2,7 @@ package com.zjgsu.hx.order_service.service;
 
 import com.zjgsu.hx.order_service.client.DishClient;
 import com.zjgsu.hx.order_service.client.UserClient;
+import com.zjgsu.hx.order_service.common.ApiResponse;
 import com.zjgsu.hx.order_service.dto.DishDTO;
 import com.zjgsu.hx.order_service.dto.UserDTO;
 import com.zjgsu.hx.order_service.exception.ResourceNotFoundException;
@@ -44,7 +45,8 @@ public class OrderService {
     public Order createOrder(OrderRequest request) {
 
         // 1️⃣ 校验用户
-        UserDTO user = userClient.getUserById(request.getUserId());
+        ApiResponse<UserDTO> userResp = userClient.getUserById(request.getUserId());
+        UserDTO user = userResp == null ? null : userResp.getData();
         if (user == null) {
             throw new ResourceNotFoundException("用户不存在");
         }
@@ -53,12 +55,14 @@ public class OrderService {
         List<OrderItem> orderItems = new ArrayList<>();
 
         for (OrderItemDTO itemDTO : request.getItems()) {
-            DishDTO dish = dishClient.getDishById(itemDTO.getDishId());
-            System.out.println("Dish fetched: " + dish.toString());
+            ApiResponse<DishDTO> dishResp = dishClient.getDishById(itemDTO.getDishId());
+            DishDTO dish = dishResp == null ? null : dishResp.getData();
 
             if (dish == null) {
                 throw new ResourceNotFoundException("菜品不存在：" + itemDTO.getDishId());
             }
+
+            System.out.println("Dish fetched: " + dish);
 
         }
 
@@ -79,7 +83,12 @@ public class OrderService {
 
         // 4️⃣ 组装订单项
         for (OrderItemDTO itemDTO : request.getItems()) {
-            DishDTO dish = dishClient.getDishById(itemDTO.getDishId());
+            ApiResponse<DishDTO> dishResp = dishClient.getDishById(itemDTO.getDishId());
+            DishDTO dish=dishResp==null?null:dishResp.getData();
+
+            if (dish == null) {
+                throw new ResourceNotFoundException("菜品不存在：" + itemDTO.getDishId());
+            }
 
             Double subtotal = dish.getPrice() * itemDTO.getQuantity();
 
