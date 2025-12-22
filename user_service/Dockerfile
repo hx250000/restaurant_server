@@ -16,6 +16,6 @@ COPY --from=build /workspace/target/*.jar ./app.jar
 
 ENV JAVA_OPTS=""
 
-EXPOSE 8083
+EXPOSE 8081
 
 ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar /app/app.jar"]
