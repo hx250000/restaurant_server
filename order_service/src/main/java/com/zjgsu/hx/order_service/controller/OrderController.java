@@ -3,6 +3,7 @@ package com.zjgsu.hx.order_service.controller;
 
 import com.zjgsu.hx.order_service.common.ApiResponse;
 import com.zjgsu.hx.order_service.model.Order;
+import com.zjgsu.hx.order_service.model.OrderStatus;
 import com.zjgsu.hx.order_service.model.frontend.OrderRequest;
 import com.zjgsu.hx.order_service.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,9 +47,27 @@ public class OrderController {
     /**
      * 3️⃣ 完成订单（确认收货 / 订单完成）
      */
-    @PutMapping("/{orderId}/finish")
+    @PutMapping("/admin/{orderId}/finish")
     public ApiResponse<Order> finishOrder(@PathVariable Long orderId) {
         Order order = orderService.completeOrder(orderId);
         return ApiResponse.success(order);
+    }
+
+    /**
+     * 4️⃣ 根据用户查询订单
+     */
+    @GetMapping("/user/list/{userId}")
+    public ApiResponse<List<Order>> getOrdersByUserId(@PathVariable Long userId) {
+        List<Order> orders = orderService.getOrdersByUserId(userId);
+        return ApiResponse.success(orders);
+    }
+
+    /**
+     * 商家：根据订单状态查询
+     */
+    @GetMapping("/admin/status/{status}")
+    public ApiResponse<List<Order>> getOrdersByStatus(@PathVariable String status) {
+        List<Order> orders = orderService.getOrdersByStatus(OrderStatus.valueOf(status));
+        return ApiResponse.success(orders);
     }
 }

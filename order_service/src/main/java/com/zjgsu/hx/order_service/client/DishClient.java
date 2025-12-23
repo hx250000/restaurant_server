@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
-@FeignClient(name = "dish-service")
+@FeignClient(name = "dish-service", fallback = DishClientFallback.class)
 public interface DishClient {
 //    private static final String DISH_SERVICE_URL = "http://localhost:8082";
 //

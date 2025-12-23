@@ -41,12 +41,24 @@ public class OrderService {
         return orderRepository.findAll();
     }
 
+    // 4️⃣ 根据用户查询订单
+    public List<Order> getOrdersByUserId(Long userId) {
+        return orderRepository.findByUserIdOrderByCreateTimeDesc(userId);
+    }
+
+    // 商家：根据订单状态查询
+    public List<Order> getOrdersByStatus(OrderStatus status) {
+        return orderRepository.findByStatus(status);
+    }
+
+    // 1️⃣ 创建订单（下单）
     @Transactional
     public Order createOrder(OrderRequest request) {
 
         // 1️⃣ 校验用户
-        ApiResponse<UserDTO> userResp = userClient.getUserById(request.getUserId());
-        UserDTO user = userResp == null ? null : userResp.getData();
+//        ApiResponse<UserDTO> userResp = userClient.getUserById(request.getUserId());
+//        UserDTO user = userResp == null ? null : userResp.getData();
+        UserDTO user=requireUser(request.getUserId());
         if (user == null) {
             throw new ResourceNotFoundException("用户不存在");
         }
@@ -55,8 +67,9 @@ public class OrderService {
         List<OrderItem> orderItems = new ArrayList<>();
 
         for (OrderItemDTO itemDTO : request.getItems()) {
-            ApiResponse<DishDTO> dishResp = dishClient.getDishById(itemDTO.getDishId());
-            DishDTO dish = dishResp == null ? null : dishResp.getData();
+//            ApiResponse<DishDTO> dishResp = dishClient.getDishById(itemDTO.getDishId());
+//            DishDTO dish = dishResp == null ? null : dishResp.getData();
+            DishDTO dish=requireDish(itemDTO.getDishId());
 
             if (dish == null) {
                 throw new ResourceNotFoundException("菜品不存在：" + itemDTO.getDishId());
@@ -83,8 +96,9 @@ public class OrderService {
 
         // 4️⃣ 组装订单项
         for (OrderItemDTO itemDTO : request.getItems()) {
-            ApiResponse<DishDTO> dishResp = dishClient.getDishById(itemDTO.getDishId());
-            DishDTO dish=dishResp==null?null:dishResp.getData();
+//            ApiResponse<DishDTO> dishResp = dishClient.getDishById(itemDTO.getDishId());
+//            DishDTO dish=dishResp==null?null:dishResp.getData();
+            DishDTO dish=requireDish(itemDTO.getDishId());
 
             if (dish == null) {
                 throw new ResourceNotFoundException("菜品不存在：" + itemDTO.getDishId());
@@ -123,6 +137,8 @@ public class OrderService {
         return order;
     }
 
+    // 3️⃣ 完成订单（确认收货 / 订单完成）
+    @Transactional
     public Order completeOrder(Long orderId) {
         Order order=orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("订单不存在"));
@@ -133,6 +149,42 @@ public class OrderService {
     public Order getOrderById(Long orderId) {
         return orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("订单不存在!"));
+    }
+
+    private DishDTO requireDish(Long dishId) {
+        ApiResponse<DishDTO> resp = dishClient.getDishById(dishId);
+
+        if (resp == null) {
+            throw new RuntimeException("菜品服务无响应");
+        }
+
+        if (resp.getCode() != 200) {
+            throw new RuntimeException("获取菜品失败：" + resp.getMessage());
+        }
+
+        if (resp.getData() == null) {
+            throw new RuntimeException("菜品数据为空");
+        }
+
+        return resp.getData();
+    }
+
+    private UserDTO requireUser(Long userId) {
+        ApiResponse<UserDTO> resp = userClient.getUserById(userId);
+
+        if (resp == null) {
+            throw new RuntimeException("用户服务无响应");
+        }
+
+        if (resp.getCode() != 200) {
+            throw new RuntimeException("获取用户失败：" + resp.getMessage());
+        }
+
+        if (resp.getData() == null) {
+            throw new RuntimeException("用户数据为空");
+        }
+
+        return resp.getData();
     }
 }
 
