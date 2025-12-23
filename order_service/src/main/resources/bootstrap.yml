@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: order-service # 服务名称
+  #  profiles:
+  #    active: @profile.active@ # 配合 Maven 的 profiles 自动切换，或者在启动命令指定
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_HOST:localhost}:8848 # 使用变量，Docker运行时可覆盖
+        group: RESTAURANT_GROUP
+        namespace: public
+      config:
+        server-addr: ${NACOS_HOST:localhost}:8848
+        group: RESTAURANT_GROUP
+        file-extension: yaml # Nacos上配置文件的后缀
