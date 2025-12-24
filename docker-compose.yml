@@ -161,6 +161,36 @@ services:
     networks:
       - restaurant-network
     restart: unless-stopped
+    
+  r-gateway-service:
+    build:
+      context: ./gateway_service
+      dockerfile: Dockerfile
+    ports:
+      - "8900:8900"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      # Gateway 端口
+      SERVER_PORT: 8900
+      # Nacos 注册 & 配置中心地址（关键）
+      SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: nacos:8848
+      SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR: nacos:8848
+      # 建议显式开启 discovery locator（避免 lb:// 不生效）
+      SPRING_CLOUD_GATEWAY_DISCOVERY_LOCATOR_ENABLED: "true"
+      SPRING_CLOUD_GATEWAY_DISCOVERY_LOCATOR_LOWER_CASE_SERVICE_ID: "true"
+
+    depends_on:
+      nacos:
+        condition: service_started
+      r-user-service:
+        condition: service_started
+      r-dish-service:
+        condition: service_started
+      r-order-service:
+        condition: service_started
+    networks:
+      - restaurant-network
+    restart: unless-stopped
 
 networks:
   restaurant-network:
