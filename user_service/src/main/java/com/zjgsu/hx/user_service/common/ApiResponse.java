@@ -52,6 +52,11 @@ public class ApiResponse<T> {
         return new ApiResponse<>(401, message, null);
     }
 
+    // 禁止登录
+    public static <T> ApiResponse<T> forbidden(String message){
+        return new ApiResponse<>(403,message,null);
+    }
+
     // 未找到
     public static <T> ApiResponse<T> notFound(String message) {
         return new ApiResponse<>(404, message, null);

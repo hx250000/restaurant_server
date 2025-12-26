@@ -4,3 +4,7 @@ server:
 spring:
   application:
     name: user-service
+
+jwt:
+  secret: your-256-bit-secret-key-here-must-be-long-enough-for-HS512-algorithm
+  expiration: 86400000  # 24小时(毫秒)

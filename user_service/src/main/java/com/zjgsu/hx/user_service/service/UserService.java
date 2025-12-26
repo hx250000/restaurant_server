@@ -4,6 +4,7 @@ import com.zjgsu.hx.user_service.exception.ResourceConflictException;
 import com.zjgsu.hx.user_service.exception.ResourceNotFoundException;
 import com.zjgsu.hx.user_service.exception.UnauthorizedException;
 import com.zjgsu.hx.user_service.model.User;
+import com.zjgsu.hx.user_service.model.UserRole;
 import com.zjgsu.hx.user_service.model.frontend.UserLogin;
 import com.zjgsu.hx.user_service.model.frontend.UserRegister;
 import com.zjgsu.hx.user_service.repository.UserRepository;
@@ -125,6 +126,20 @@ public class UserService {
         User user = userRepository.findUserByUsernameAndPassword(username, encryptedPassword);
         if (user == null) {
             throw new UnauthorizedException("用户名或密码错误，登录失败！");
+        }
+        return user;
+    }
+
+    public User authenticateAdmin(UserLogin userLogin) {
+        String username = userLogin.getUsername();
+        String password = userLogin.getPassword();
+        String encryptedPassword = encryptPassword(password);
+        User user = userRepository.findUserByUsernameAndPassword(username, encryptedPassword);
+        if (user == null) {
+            throw new UnauthorizedException("用户名或密码错误，登录失败！");
+        }
+        if (user.getRole()!= UserRole.ADMIN){
+            throw new UnauthorizedException("非管理员角色不得登入管理端！");
         }
         return user;
     }

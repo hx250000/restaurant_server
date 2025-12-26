@@ -5,19 +5,24 @@ import com.zjgsu.hx.user_service.model.User;
 import com.zjgsu.hx.user_service.model.frontend.UserLogin;
 import com.zjgsu.hx.user_service.model.frontend.UserRegister;
 import com.zjgsu.hx.user_service.service.UserService;
+import com.zjgsu.hx.user_service.util.JwtUtil;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
 
     private final UserService userService;
+    private final JwtUtil jwtUtil;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService,JwtUtil jwtUtil) {
         this.userService = userService;
+        this.jwtUtil=jwtUtil;
     }
 
     /**
@@ -75,9 +80,30 @@ public class UserController {
      * 用户登录
      */
     @PostMapping("/login")
-    public ApiResponse<User> login(
+    public ApiResponse<?> login(
             @RequestBody UserLogin userLogin) {
-        return ApiResponse.success(userService.authenticateUser(userLogin));
+        User user=userService.authenticateUser(userLogin);
+
+        String token = jwtUtil.generateToken(user.getUsername());
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("token", token);
+        data.put("username", user.getUsername());
+
+        return ApiResponse.success(data);
+    }
+
+    /**
+     * 管理员登录
+     */
+    @PostMapping("/adminlogin")
+    public ApiResponse<?> adminlogin(@RequestBody UserLogin userLogin){
+        User user=userService.authenticateAdmin(userLogin);
+        String token = jwtUtil.generateToken(user.getUsername());
+        Map<String, Object> data = new HashMap<>();
+        data.put("token", token);
+        data.put("username", user.getUsername());
+        return ApiResponse.success(data);
     }
 
     /**

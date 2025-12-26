@@ -4,3 +4,18 @@ server:
 spring:
   application:
     name: gateway-service
+
+jwt:
+  secret: your-256-bit-secret-key-here-must-be-long-enough-for-HS512-algorithm
+  expiration: 86400000  # 24小时(毫秒)
+
+security:
+  jwt:
+    whitelist:
+      - /api/users/login
+      - /api/users/adminlogin
+      - /api/users/register
+      - /api/dishes/**
+      - /actuator/**
+      - /error
+

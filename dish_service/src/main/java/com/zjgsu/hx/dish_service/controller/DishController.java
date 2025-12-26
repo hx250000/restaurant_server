@@ -19,7 +19,7 @@ public class DishController {
     /**
      * 查询所有上架菜品
      */
-    @GetMapping
+    @GetMapping("/all")
     public ApiResponse<List<Dish>> getAllDishes() {
         return ApiResponse.success(dishService.getAllDishes());
     }
