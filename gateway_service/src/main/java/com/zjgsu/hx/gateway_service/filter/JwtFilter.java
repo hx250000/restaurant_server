@@ -1,5 +1,7 @@
 package com.zjgsu.hx.gateway_service.filter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zjgsu.hx.gateway_service.common.ApiResponse;
 import com.zjgsu.hx.gateway_service.properties.JwtProperties;
 import com.zjgsu.hx.gateway_service.util.JwtUtil;
 import io.jsonwebtoken.Claims;
@@ -10,14 +12,19 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
+
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 import java.util.Arrays;
 import java.util.List;
@@ -62,7 +69,7 @@ public class JwtFilter implements GlobalFilter, Ordered {
         log.info("[JwtFilter]请求头:{}",authHeader);
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             log.warn("请求未携带有效 Authorization 头: {}", path);
-            return unauthorized(exchange);
+            return unauthorized(exchange,"请求未携带有效 Authorization 头");
         }
 
         // 3️⃣ 解析 Token
@@ -81,17 +88,42 @@ public class JwtFilter implements GlobalFilter, Ordered {
 
         } catch (Exception e) {
             log.warn("Token 校验失败: {}, path={}", e.getMessage(), path);
-            return unauthorized(exchange);
+            return unauthorized(exchange, "Token 校验失败");
         }
     }
 
     /**
      * 返回 401 未授权
      */
-    private Mono<Void> unauthorized(ServerWebExchange exchange) {
+    private Mono<Void> unauthorized(ServerWebExchange exchange,String message) {
         ServerHttpResponse response = exchange.getResponse();
         response.setStatusCode(HttpStatus.UNAUTHORIZED);
-        return response.setComplete();
+        response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+
+        ApiResponse<?> resp=ApiResponse.unauthorized(message);
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        // 注册 Java 8 时间模块
+        mapper.registerModule(new JavaTimeModule());
+        // 避免序列化 LocalDateTime 为 timestamp
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+        byte[] bytes;
+        try {
+            bytes = mapper.writeValueAsBytes(resp); // 序列化成 JSON
+            log.warn(Arrays.toString(bytes));
+        } catch (Exception e) {
+            // 万一序列化失败，返回简单 JSON
+            log.warn(e.getMessage());
+            bytes = "{\"code\":401,\"msg\":\"Unauthorized\",\"data\":null}".getBytes();
+        }
+
+        DataBuffer buffer = exchange.getResponse()
+                .bufferFactory()
+                .wrap(bytes);
+
+        return exchange.getResponse().writeWith(Mono.just(buffer));
     }
 
     @Override
