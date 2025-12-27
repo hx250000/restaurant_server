@@ -24,6 +24,10 @@ public class Dish {
     @Column(length = 500)
     private String description;
 
+    /* 分类 */
+    @Column(nullable = false)
+    private String category;
+
     /** 价格 */
     @Column(nullable = false)
     private Double price;

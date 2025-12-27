@@ -20,6 +20,9 @@ public interface DishRepository extends JpaRepository<Dish, Long> {
     @Query("SELECT d FROM Dish d WHERE d.dishname LIKE %:keyword% AND d.status = 1")
     List<Dish> findByDishnameKeyword(String keyword);
 
+    @Query("SELECT d from Dish d where d.category=:category and d.status=1")
+    List<Dish> findDishesByCategory(String category);
+
 //    @Query("SELECT d FROM Dish d WHERE d.dishname = :dishname AND d.status = 1")
     boolean existsByDishnameAndStatus(String dishname, Integer status);
 }

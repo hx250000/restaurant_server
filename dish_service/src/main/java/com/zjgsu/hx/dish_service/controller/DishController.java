@@ -56,6 +56,11 @@ public class DishController {
         return ApiResponse.success(dishService.addDish(dishAdd));
     }
 
+    @GetMapping("/category/{category}")
+    public ApiResponse<List<Dish>> getDishByCategory(@PathVariable String category) {
+        return ApiResponse.success(dishService.getDishesByCategory(category));
+    }
+
     /**
      * 更新菜品（全量更新）
      */

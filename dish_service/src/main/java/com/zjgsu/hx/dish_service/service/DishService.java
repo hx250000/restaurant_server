@@ -36,6 +36,10 @@ public class DishService {
         return dishRepository.findByDishnameKeyword(keyword);
     }
 
+    public List<Dish> getDishesByCategory(String category) {
+        return dishRepository.findDishesByCategory(category);
+    }
+
     @Transactional
     public Dish addDish(DishAdd dishAdd) {
         Dish dish=new Dish();
@@ -52,6 +56,7 @@ public class DishService {
             //菜品逻辑删除状态，允许重新添加
             dishExisting.setDescription(dishAdd.getDescription());
             dishExisting.setPrice(dishAdd.getPrice());
+            dishExisting.setCategory(dishAdd.getCategory());
             dishExisting.setImageUrl(dishAdd.getImageUrl());
             dishExisting.setSpicy(dishAdd.isSpicy());
             dishExisting.setStock(dishAdd.getStock());
@@ -61,6 +66,7 @@ public class DishService {
         dish.setDishname(dishAdd.getDishname());
         dish.setDescription(dishAdd.getDescription());
         dish.setPrice(dishAdd.getPrice());
+        dish.setCategory(dishAdd.getCategory());
         dish.setImageUrl(dishAdd.getImageUrl());
         dish.setSpicy(dishAdd.isSpicy());
         dish.setStock(dishAdd.getStock());
@@ -81,7 +87,7 @@ public class DishService {
     public Dish updateDish(Long id, DishAdd dishUpdate) {
         Dish dish = dishRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("菜品不存在或已删除！"));
-        if(dish.getDishname()==null||dish.getDishname().isEmpty()){
+        if(dishUpdate.getDishname()==null||dishUpdate.getDishname().isEmpty()){
             throw new IllegalArgumentException("菜品名称不能为空！");
         }
         if(!dish.getDishname().equals(dishUpdate.getDishname())){
@@ -93,6 +99,7 @@ public class DishService {
         }
         dish.setDescription(dishUpdate.getDescription());
         dish.setPrice(dishUpdate.getPrice());
+        dish.setCategory(dishUpdate.getCategory());
         dish.setImageUrl(dishUpdate.getImageUrl());
         dish.setSpicy(dishUpdate.isSpicy());
         dish.setStock(dishUpdate.getStock());
