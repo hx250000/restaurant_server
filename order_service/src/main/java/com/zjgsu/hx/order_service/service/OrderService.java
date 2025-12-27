@@ -4,6 +4,8 @@ import com.zjgsu.hx.order_service.client.DishClient;
 import com.zjgsu.hx.order_service.client.UserClient;
 import com.zjgsu.hx.order_service.common.ApiResponse;
 import com.zjgsu.hx.order_service.dto.DishDTO;
+import com.zjgsu.hx.order_service.dto.OrderDetailDTO;
+import com.zjgsu.hx.order_service.dto.OrderItemDetail;
 import com.zjgsu.hx.order_service.dto.UserDTO;
 import com.zjgsu.hx.order_service.exception.ResourceNotFoundException;
 import com.zjgsu.hx.order_service.model.Order;
@@ -37,6 +39,7 @@ public class OrderService {
     @Autowired
     private DishClient dishClient;
 
+    // 查询全部订单
     public List<Order> getAllOrders() {
         return orderRepository.findAll();
     }
@@ -137,7 +140,7 @@ public class OrderService {
         return order;
     }
 
-    // 3️⃣ 完成订单（确认收货 / 订单完成）
+    // 3️⃣ 完成订单（确认订单完成）
     @Transactional
     public Order completeOrder(Long orderId) {
         Order order=orderRepository.findById(orderId)
@@ -150,6 +153,37 @@ public class OrderService {
         return orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("订单不存在!"));
     }
+
+    // 获取订单详细
+    public OrderDetailDTO getOrderDetailByOrderNo(String orderNo){
+        Order order = orderRepository.findByOrderNo(orderNo);
+        if (order == null) {
+            throw new ResourceNotFoundException("订单不存在！");
+        }
+
+        List<OrderItem> orderItems = orderItemRepository.findByOrder(order);
+
+        List<OrderItemDetail> itemDetails = orderItems.stream().map(item -> {
+            OrderItemDetail dto = new OrderItemDetail();
+            dto.setDishId(item.getDishId());
+            dto.setDishName(item.getDishName());
+            dto.setPrice(item.getPrice());
+            dto.setQuantity(item.getQuantity());
+            dto.setSubtotal(item.getSubtotal());
+            return dto;
+        }).toList();
+
+        OrderDetailDTO dto = new OrderDetailDTO();
+        dto.setOrderNo(order.getOrderNo());
+        dto.setUserId(order.getUserId());
+        dto.setTotalAmount(order.getTotalAmount());
+        dto.setStatus(order.getStatus());
+        dto.setCreateTime(order.getCreateTime());
+        dto.setItems(itemDetails);
+
+        return dto;
+    }
+
 
     private DishDTO requireDish(Long dishId) {
         ApiResponse<DishDTO> resp = dishClient.getDishById(dishId);

@@ -2,6 +2,7 @@ package com.zjgsu.hx.order_service.controller;
 
 
 import com.zjgsu.hx.order_service.common.ApiResponse;
+import com.zjgsu.hx.order_service.dto.OrderDetailDTO;
 import com.zjgsu.hx.order_service.model.Order;
 import com.zjgsu.hx.order_service.model.OrderStatus;
 import com.zjgsu.hx.order_service.model.frontend.OrderRequest;
@@ -38,7 +39,7 @@ public class OrderController {
     /**
      * 2️⃣ 查询订单详情
      */
-    @GetMapping("/{orderId}")
+    @GetMapping("/id/{orderId}")
     public ApiResponse<Order> getOrderById(@PathVariable Long orderId) {
         Order order = orderService.getOrderById(orderId);
         return ApiResponse.success(order);
@@ -69,5 +70,13 @@ public class OrderController {
     public ApiResponse<List<Order>> getOrdersByStatus(@PathVariable String status) {
         List<Order> orders = orderService.getOrdersByStatus(OrderStatus.valueOf(status));
         return ApiResponse.success(orders);
+    }
+
+    /**
+     * 根据订单号查询订单详细
+     */
+    @GetMapping("/orderno/{orderNo}")
+    public ApiResponse<OrderDetailDTO> getOrderByOrderNo(@PathVariable String orderNo) {
+        return ApiResponse.success(orderService.getOrderDetailByOrderNo(orderNo));
     }
 }
