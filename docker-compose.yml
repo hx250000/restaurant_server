@@ -227,7 +227,7 @@ services:
 networks:
   restaurant-network:
     driver: bridge
-    external: true
+#    external: true
 
 volumes:
   r-user-db-data:
@@ -239,5 +239,9 @@ volumes:
   nacos-data:
     driver: local
   nacos-logs:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
     driver: local
 
