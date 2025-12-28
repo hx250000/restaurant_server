@@ -25,6 +25,7 @@ echo -e "\n3. 测试dish服务 - 创建dish"
     "price": 20.9,
     "imageUrl": "-",
     "isSpicy": false,
+    "category": "test",
     "stock": 100
   }'
  # 4. 获取所有dish
@@ -46,7 +47,7 @@ echo -e "\n5. 测试order"
 EOF
 )
 
-echo "$ORDER_JSON"
+echo "order:\n$ORDER_JSON"
 
  curl -X POST http://localhost:8083/api/orders \
    -H "Content-Type: application/json" \

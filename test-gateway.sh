@@ -24,6 +24,7 @@ echo -e "\n3. 测试dish服务 - 创建dish"
     "description": "discriptiongateway",
     "price": 20.9,
     "imageUrl": "-",
+    "category": "test"
     "isSpicy": false,
     "stock": 100
   }'
@@ -46,7 +47,7 @@ echo -e "\n5. 测试order"
 EOF
 )
 
-echo "$ORDER_JSON"
+echo "order:\n$ORDER_JSON"
 
  curl -X POST http://localhost:8900/api/orders \
    -H "Content-Type: application/json" \
