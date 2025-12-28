@@ -144,7 +144,7 @@ services:
       dockerfile: Dockerfile
     #    container_name:
     ports:
-      - "8083:8083"
+      - "8083"
     environment:
       NACOS_HOST: nacos
       SPRING_PROFILES_ACTIVE: docker

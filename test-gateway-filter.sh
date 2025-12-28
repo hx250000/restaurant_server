@@ -17,7 +17,7 @@ TOKEN=$(curl -s -X POST "$GATEWAY_URL/api/users/login" \
   -H "Content-Type: application/json" \
   -d '{
         "username": "hx",
-        "password": "hx114514"
+        "password": "hbcpyx11"
       }' | jq -r '.data.token')
 
 echo "TOKEN=$TOKEN"
