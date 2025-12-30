@@ -44,9 +44,7 @@ public class DishService {
     public Dish addDish(DishAdd dishAdd) {
         Dish dish=new Dish();
         //唯一性校验
-        if(dishAdd.getDishname()==null||dishAdd.getDishname().isEmpty()){
-            throw new IllegalArgumentException("菜品名称不能为空！");
-        }
+        informationCheck(dishAdd);
         if(dishRepository.existsByDishnameAndStatus(dishAdd.getDishname(), 1)){
             Dish dishExisting=dishRepository.findByDishname(dishAdd.getDishname()).get();
             //菜品已上架
@@ -58,7 +56,7 @@ public class DishService {
             dishExisting.setPrice(dishAdd.getPrice());
             dishExisting.setCategory(dishAdd.getCategory());
             dishExisting.setImageUrl(dishAdd.getImageUrl());
-            dishExisting.setSpicy(dishAdd.isSpicy());
+            dishExisting.setSpicy(dishAdd.getSpicy());
             dishExisting.setStock(dishAdd.getStock());
             dishExisting.setStatus(1);
             return dishRepository.save(dishExisting);
@@ -68,7 +66,7 @@ public class DishService {
         dish.setPrice(dishAdd.getPrice());
         dish.setCategory(dishAdd.getCategory());
         dish.setImageUrl(dishAdd.getImageUrl());
-        dish.setSpicy(dishAdd.isSpicy());
+        dish.setSpicy(dishAdd.getSpicy());
         dish.setStock(dishAdd.getStock());
         dish.setStatus(1);
         return dishRepository.save(dish);
@@ -87,6 +85,7 @@ public class DishService {
     public Dish updateDish(Long id, DishAdd dishUpdate) {
         Dish dish = dishRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("菜品不存在或已删除！"));
+        informationCheck(dishUpdate);
         if(dishUpdate.getDishname()==null||dishUpdate.getDishname().isEmpty()){
             throw new IllegalArgumentException("菜品名称不能为空！");
         }
@@ -101,7 +100,7 @@ public class DishService {
         dish.setPrice(dishUpdate.getPrice());
         dish.setCategory(dishUpdate.getCategory());
         dish.setImageUrl(dishUpdate.getImageUrl());
-        dish.setSpicy(dishUpdate.isSpicy());
+        dish.setSpicy(dishUpdate.getSpicy());
         dish.setStock(dishUpdate.getStock());
         return dishRepository.save(dish);
     }
@@ -131,5 +130,23 @@ public class DishService {
         }
         dish.setStock(dish.getStock()-reduceStock);
         return dishRepository.save(dish);
+    }
+
+    private void informationCheck(DishAdd dishAdd){
+        if(dishAdd.getDishname()==null||dishAdd.getDishname().isEmpty()){
+            throw new IllegalArgumentException("菜品名称不能为空！");
+        }
+        if(dishAdd.getPrice()==null||dishAdd.getPrice()<=0.0){
+            throw new IllegalArgumentException("菜品价格必须大于0！");
+        }
+        if(dishAdd.getStock()<=0){
+            throw new IllegalArgumentException("菜品库存不能为空！");
+        }
+        if(dishAdd.getSpicy()==null){
+            throw new IllegalArgumentException("辣度不能为空！");
+        }
+        if(dishAdd.getCategory()==null||dishAdd.getCategory().isEmpty()){
+            throw new IllegalArgumentException("菜品分类不能为空！");
+        }
     }
 }

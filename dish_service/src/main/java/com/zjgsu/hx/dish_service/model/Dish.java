@@ -37,7 +37,7 @@ public class Dish {
 
     /** 是否辣 */
     @Column(nullable = false)
-    private boolean isSpicy;
+    private boolean spicy;
 
     /** 当前库存 */
     @Column(nullable = false)

@@ -9,6 +9,6 @@ public class DishAdd {
     private Double price;
     private String imageUrl;
     private String category;
-    private boolean isSpicy;
+    private Boolean spicy;
     private Integer stock;
 }
