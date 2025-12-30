@@ -24,9 +24,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u WHERE u.username LIKE CONCAT('%', :keyword, '%') AND u.isDeleted = 0")
     List<User> findByUserNameKeyword(@Param("keyword") String keyword);
 
-    boolean existsByPhone(String phone);
+    boolean existsByPhoneAndIsDeleted(String phone, Integer isDeleted);
 
-    boolean existsByUsername(String username);
+    boolean existsByUsernameAndIsDeleted(String username, Integer isDeleted);
 
     @Query("SELECT u FROM User u WHERE u.username = :username AND u.password = :password AND u.isDeleted = 0")
     User findUserByUsernameAndPassword(String username, String password);
