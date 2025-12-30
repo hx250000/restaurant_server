@@ -7,6 +7,7 @@ import com.zjgsu.hx.user_service.model.User;
 import com.zjgsu.hx.user_service.model.UserRole;
 import com.zjgsu.hx.user_service.model.frontend.UserLogin;
 import com.zjgsu.hx.user_service.model.frontend.UserRegister;
+import com.zjgsu.hx.user_service.model.frontend.UserResetPassword;
 import com.zjgsu.hx.user_service.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +37,7 @@ public class UserService {
 
     // 根据username，查不到用户时返回 null（前端显示为空但不报错）
     public User findByUsername(String username) {
-        return userRepository.findByUsername(username).orElse(null);
+        return userRepository.findByUsernameAndIsDeleted(username,0).orElse(null);
                 //.orElseThrow(() -> new ResourceNotFoundException("用户未找到！"));
     }
 
@@ -55,7 +56,8 @@ public class UserService {
 
         if (user.isPresent()) {// 用户名已存在
             User existingUser = user.get();
-            Integer isdeleted = existingUser.getIsDeleted();
+            log.info("existing user: {}", existingUser);
+            int isdeleted = existingUser.getIsDeleted();
             if (isdeleted == 1) {// 逻辑删除状态，允许重新注册
                 if (userRepository.existsByPhoneAndIsDeleted(userReg.getPhone(),0)) {
                     throw new ResourceConflictException("手机号已被注册！");
@@ -149,6 +151,19 @@ public class UserService {
             throw new UnauthorizedException("非管理员角色不得登入管理端！");
         }
         return user;
+    }
+
+    public User resetPassword(UserResetPassword userResetPassword) {
+        String username=userResetPassword.getUserName();
+        User userToReset=userRepository.findByUsernameAndIsDeleted(username,0)
+                .orElseThrow(()->new ResourceNotFoundException("用户不存在！"));
+        String newPassword=userResetPassword.getNewPassword();
+        if(newPassword==null || newPassword.isEmpty()){
+            throw new IllegalArgumentException("密码不能为空！");
+        }
+        String encryptedPassword = encryptPassword(newPassword);
+        userToReset.setPassword(encryptedPassword);
+        return userRepository.save(userToReset);
     }
 
     public String encryptPassword(String password) {

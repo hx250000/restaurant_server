@@ -15,8 +15,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u WHERE u.isDeleted = 0")
     List<User> findAll();
 
-    @Query("SELECT u FROM User u WHERE u.username = :username AND u.isDeleted = 0")
-    Optional<User> findByUsername(String username);
+    Optional<User> findByUsernameAndIsDeleted(String username, Integer isDeleted);
 
     @Query("SELECT u FROM User u WHERE u.id = :id AND u.isDeleted = 0")
     Optional<User> findById(Long id);
@@ -31,4 +30,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u WHERE u.username = :username AND u.password = :password AND u.isDeleted = 0")
     User findUserByUsernameAndPassword(String username, String password);
 
+    Optional<User> findByUsername(String username);
 }

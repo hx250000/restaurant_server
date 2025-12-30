@@ -4,6 +4,7 @@ import com.zjgsu.hx.user_service.common.ApiResponse;
 import com.zjgsu.hx.user_service.model.User;
 import com.zjgsu.hx.user_service.model.frontend.UserLogin;
 import com.zjgsu.hx.user_service.model.frontend.UserRegister;
+import com.zjgsu.hx.user_service.model.frontend.UserResetPassword;
 import com.zjgsu.hx.user_service.service.UserService;
 import com.zjgsu.hx.user_service.util.JwtUtil;
 import jakarta.annotation.Resource;
@@ -104,6 +105,11 @@ public class UserController {
         data.put("token", token);
         data.put("username", user.getUsername());
         return ApiResponse.success(data);
+    }
+
+    @PutMapping("/reset")
+    public ApiResponse<?> resetPassword(@RequestBody UserResetPassword userResetPassword){
+        return ApiResponse.success(userService.resetPassword(userResetPassword));
     }
 
     /**
