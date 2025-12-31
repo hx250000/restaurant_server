@@ -8,6 +8,7 @@ import com.zjgsu.hx.user_service.model.UserRole;
 import com.zjgsu.hx.user_service.model.frontend.UserLogin;
 import com.zjgsu.hx.user_service.model.frontend.UserRegister;
 import com.zjgsu.hx.user_service.model.frontend.UserResetPassword;
+import com.zjgsu.hx.user_service.model.frontend.UserUpdate;
 import com.zjgsu.hx.user_service.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -90,7 +91,7 @@ public class UserService {
     }
 
     @Transactional
-    public User updateUser(Long id, UserRegister updatedUser) {
+    public User updateUser(Long id, UserUpdate updatedUser) {
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("用户不存在或已删除！"));
 
@@ -110,10 +111,8 @@ public class UserService {
         }
         // 更新字段
         existingUser.setUsername(updatedUser.getUsername());
-        existingUser.setPassword(encryptPassword(updatedUser.getPassword()));
         existingUser.setPhone(updatedUser.getPhone());
         existingUser.setAddress(updatedUser.getAddress());
-        existingUser.setRole(updatedUser.getUserrole());
         existingUser.setUpdateTime(LocalDateTime.now());
 
         return userRepository.save(existingUser);
@@ -216,6 +215,39 @@ public class UserService {
         if (userRegister.getUserrole() == null) {
             throw new ResourceConflictException("用户角色不能为空！");
         }
+    }
+    public void checkInformation(UserUpdate userUpdate){
+        if (userUpdate == null) {
+            throw new ResourceConflictException("用户信息不能为空！");
+        }
+
+        log.info(userUpdate.toString());
+
+        // 1. 用户名校验
+        String username = userUpdate.getUsername();
+        if (username == null || username.trim().isEmpty()) {
+            throw new ResourceConflictException("用户名不能为空！");
+        }
+
+        if (!username.matches("^[a-zA-Z0-9_]+$")) {
+            throw new ResourceConflictException("用户名只能包含字母、数字和下划线！");
+        }
+
+        // 3. 手机号校验（中国大陆）
+        String phone = userUpdate.getPhone();
+        if (phone == null || phone.trim().isEmpty()) {
+            throw new ResourceConflictException("手机号不能为空！");
+        }
+        if (!phone.matches("^1[3-9]\\d{9}$")) {
+            throw new ResourceConflictException("手机号格式不正确！");
+        }
+
+        // 4. 地址校验
+        String address = userUpdate.getAddress();
+        if (address == null || address.trim().isEmpty()) {
+            throw new ResourceConflictException("地址不能为空！");
+        }
+
     }
 
 }

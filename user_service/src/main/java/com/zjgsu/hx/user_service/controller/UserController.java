@@ -5,6 +5,7 @@ import com.zjgsu.hx.user_service.model.User;
 import com.zjgsu.hx.user_service.model.frontend.UserLogin;
 import com.zjgsu.hx.user_service.model.frontend.UserRegister;
 import com.zjgsu.hx.user_service.model.frontend.UserResetPassword;
+import com.zjgsu.hx.user_service.model.frontend.UserUpdate;
 import com.zjgsu.hx.user_service.service.UserService;
 import com.zjgsu.hx.user_service.util.JwtUtil;
 import jakarta.annotation.Resource;
@@ -73,8 +74,8 @@ public class UserController {
     @PutMapping("/{id}")
     public ApiResponse<User> update(
             @PathVariable Long id,
-            @RequestBody UserRegister userRegister) {
-        return ApiResponse.success(userService.updateUser(id, userRegister));
+            @RequestBody UserUpdate userUpdate) {
+        return ApiResponse.success(userService.updateUser(id, userUpdate));
     }
 
     /**
@@ -90,6 +91,7 @@ public class UserController {
         Map<String, Object> data = new HashMap<>();
         data.put("token", token);
         data.put("username", user.getUsername());
+        data.put("userid",user.getId());
 
         return ApiResponse.success(data);
     }

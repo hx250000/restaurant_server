@@ -32,6 +32,8 @@ public class OrderController {
      */
     @PostMapping
     public ApiResponse<Order> createOrder(@RequestBody OrderRequest request) {
+        System.out.println("raw json = {}"+ request.toString());
+
         Order order = orderService.createOrder(request);
         return ApiResponse.success(order);
     }
