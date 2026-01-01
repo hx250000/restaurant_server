@@ -3,6 +3,11 @@ spring:
     name: order-service # 服务名称
   #  profiles:
   #    active: @profile.active@ # 配合 Maven 的 profiles 自动切换，或者在启动命令指定
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    open-in-view: false
   cloud:
     nacos:
       discovery:
@@ -13,3 +18,4 @@ spring:
         server-addr: ${NACOS_HOST:localhost}:8848
         group: RESTAURANT_GROUP
         file-extension: yaml # Nacos上配置文件的后缀
+        
