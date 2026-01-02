@@ -15,12 +15,11 @@ TOKEN=$(curl -s -X POST "http://localhost:8900/api/users/login" \
 
 echo "TOKEN=$TOKEN"
 
-#echo "检查 Nacos 控制台..."
-#curl http://localhost:8848/nacos/
+echo "检查 Nacos 控制台..."
+curl http://localhost:8848/nacos/
 
 echo ""
 echo "检查服务注册情况..."
-#curl -X GET "http://localhost:8848/nacos/v1/ns/instance/list?serviceName=catalog-service"
 curl -X GET "http://localhost:8848/nacos/v1/ns/instance/list?serviceName=r-order-service&groupName=RESTAURANT_GROUP&namespaceId=public"
 
 echo ""
