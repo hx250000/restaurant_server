@@ -33,6 +33,9 @@ public class Order {
     /** 订单备注 */
     private String remark;
 
+    /** 配送地址 */
+    private String address;
+
     /* 订单明细关联（非必需，可单独通过 Repository 查询） */
     //@OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     //private List<OrderItem> items;

@@ -128,6 +128,7 @@ public class OrderService {
         order.setTotalAmount(totalAmount);
         order.setStatus(OrderStatus.CREATED);
         order.setRemark(request.getRemark());
+        order.setAddress(user.getAddress());
 
         orderRepository.save(order);
 
@@ -176,6 +177,8 @@ public class OrderService {
         OrderDetailDTO dto = new OrderDetailDTO();
         dto.setOrderNo(order.getOrderNo());
         dto.setUserId(order.getUserId());
+        dto.setAddress(order.getAddress());
+        dto.setRemark(order.getRemark());
         dto.setTotalAmount(order.getTotalAmount());
         dto.setStatus(order.getStatus());
         dto.setCreateTime(order.getCreateTime());
