@@ -73,8 +73,8 @@ public class DishController {
     /**
      * 逻辑删除菜品
      */
-    @DeleteMapping("/{id}")
-    public ApiResponse<Dish> deleteDish(@PathVariable Long id) {
+    @DeleteMapping
+    public ApiResponse<Dish> deleteDish(@RequestParam Long id) {
         return ApiResponse.success(dishService.deleteDishById(id));
     }
 
