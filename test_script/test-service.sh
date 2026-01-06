@@ -24,7 +24,7 @@ echo -e "\n3. 测试dish服务 - 创建dish"
     "description": "discription1",
     "price": 20.9,
     "imageUrl": "-",
-    "isSpicy": false,
+    "spicy": false,
     "category": "test",
     "stock": 100
   }'
@@ -42,7 +42,8 @@ echo -e "\n5. 测试order"
       "dishId": 1,
       "quantity": 1
     }
-  ]
+  ],
+  "remark":""
 }
 EOF
 )

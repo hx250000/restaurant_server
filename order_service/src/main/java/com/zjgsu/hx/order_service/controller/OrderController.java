@@ -8,15 +8,22 @@ import com.zjgsu.hx.order_service.model.OrderStatus;
 import com.zjgsu.hx.order_service.model.frontend.OrderRequest;
 import com.zjgsu.hx.order_service.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@RefreshScope
 @RequestMapping("/api/orders")
 public class OrderController {
     @Autowired
     private OrderService orderService;
+
+
+
+
 
     /**
      * 查询所有订单（管理员专用接口，实际项目中应有权限控制）

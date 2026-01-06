@@ -5,6 +5,7 @@ import com.zjgsu.hx.dish_service.model.Dish;
 import com.zjgsu.hx.dish_service.model.frontend.DishAdd;
 import com.zjgsu.hx.dish_service.service.DishService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,6 +16,17 @@ public class DishController {
 
     @Autowired
     private DishService dishService;
+
+    @Value("${test.nacos}")
+    private String config;
+
+    /*
+    nacos config测试
+     */
+    @GetMapping("/test")
+    public String nacosConfigTest(){
+        return this.config;
+    }
 
     /**
      * 查询所有上架菜品
@@ -73,8 +85,8 @@ public class DishController {
     /**
      * 逻辑删除菜品
      */
-    @DeleteMapping("/{id}")
-    public ApiResponse<Dish> deleteDish(@PathVariable Long id) {
+    @DeleteMapping
+    public ApiResponse<Dish> deleteDish(@RequestParam Long id) {
         return ApiResponse.success(dishService.deleteDishById(id));
     }
 
