@@ -120,7 +120,7 @@ services:
       dockerfile: Dockerfile
     #    container_name:
     ports:
-      - "8082:8082"
+      - "8082"
     environment:
       SPRING_PROFILES_ACTIVE: docker
       SPRING_DATASOURCE_URL: jdbc:mysql://r-dish-db:3306/restaurant_dish?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC

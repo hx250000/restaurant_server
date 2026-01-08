@@ -75,7 +75,7 @@ public class UserService {
                 throw new ResourceConflictException("用户名已存在！");
             }
         }
-        if (userRepository.existsByPhoneAndIsDeleted(userReg.getPhone(),0)) {
+        if (userRepository.existsByPhoneAndIsDeleted(userReg.getPhone(),1)||userRepository.existsByPhoneAndIsDeleted(userReg.getPhone(),0)) {
             throw new ResourceConflictException("手机号已被注册！");
         }
         // 2. 创建新用户

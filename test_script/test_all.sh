@@ -1,14 +1,25 @@
 #!/bin/bash
-set -euo pipefail
+set -uo pipefail
 
 # 综合自动化测试脚本：注册 / 登录 / 新增菜品 / 下单 / 网关鉴权 / Nacos / 负载测试
 # 依赖：curl, jq
+
+TEST_USERNAME="testadmin"
+TEST_PASSWORD="123456"
+
+ADMIN_USERNAME="admin"
+ADMIN_PASSWORD="adminpassword"
 
 GATEWAY_URL="http://localhost:8900"
 USER_URL="http://localhost:8081"
 DISH_URL="http://localhost:8082"
 ORDER_URL="http://localhost:8083"
 NACOS_URL="http://localhost:8848"
+
+echo "===registering admin==="
+curl -s -X POST "$USER_URL/api/users/register" \
+  -H 'Content-Type: application/json' \
+  -d "{\"username\": \"$ADMIN_USERNAME\", \"password\": \"$ADMIN_PASSWORD\", \"phone\": \"19999999909\", \"address\": \"自动化测试地址\", \"userrole\": \"ADMIN\" }" 
 
 REQ_TIMEOUT=5
 
@@ -55,6 +66,7 @@ wait_for() {
   done
 }
 
+echo ""
 echo "===== 开始综合测试脚本 ====="
 
 echo "--> 检查 Nacos 控制台"
@@ -67,17 +79,22 @@ fi
 echo "--> 检查网关白名单接口（无需 token）"
 curl -s --max-time $REQ_TIMEOUT "$GATEWAY_URL/api/dishes/all" | jq -r '.message' || echo "请求失败或返回非 JSON"
 
-USERNAME="test_auto_$(date +%s | sha1sum | cut -c1-6)"
-PASSWORD="P@ssw0rd123"
+USERNAME=$TEST_USERNAME
+PASSWORD=$TEST_PASSWORD
 
 echo "--> 注册测试用户: $USERNAME"
-curl -s -X POST "$USER_URL/api/users/register" \
+REGISTER_RESP=$(curl -s -X POST "$USER_URL/api/users/register" \
   -H 'Content-Type: application/json' \
-  -d "{\"username\": \"$USERNAME\", \"password\": \"$PASSWORD\", \"phone\": \"13800000000\", \"address\": \"自动化测试地址\", \"userrole\": \"ADMIN\" }" | jq -r '.message, .data'
+  -d "{\"username\": \"$USERNAME\", \"password\": \"$PASSWORD\", \"phone\": \"13900010001\", \"address\": \"自动化测试地址\", \"userrole\": \"ADMIN\" }" )
+  
+echo "注册返回: $REGISTER_RESP"
+  
+USER_ID=$(echo "$REGISTER_RESP" | jq -r '.data.id // empty')
+echo "USER_ID=${USER_ID}"
 
 echo "等待用户服务稳定后查询用户 ID"
 wait_for "user-service" "$USER_URL/api/users/user/$USERNAME" 20 || true
-USER_ID=$(curl -s "$USER_URL/api/users/user/$USERNAME" | jq -r '.data.id // .data' 2>/dev/null || echo "null")
+#USER_ID=$(curl -s "$USER_URL/api/users/user/$USERNAME" | jq -r '.data.id // .data' 2>/dev/null || echo "null")
 if [ "$USER_ID" = "null" ] || [ -z "$USER_ID" ]; then
   echo "未能获取到用户 ID，继续尝试通过 /api/users 列表抓取"
   USER_ID=$(curl -s "$USER_URL/api/users" | jq -r '.data[0].id // empty') || true
@@ -88,7 +105,7 @@ echo "--> 用户登录获取 token"
 TOKEN=$(curl -s -X POST "$USER_URL/api/users/login" -H 'Content-Type: application/json' -d "{\"username\":\"$USERNAME\",\"password\":\"$PASSWORD\"}" | jq -r '.data.token // empty')
 if [ -z "$TOKEN" ]; then
   echo "登录未返回 token，尝试管理员登录获取 admin token"
-  ADMIN_TOKEN=$(curl -s -X POST "$USER_URL/api/users/adminlogin" -H 'Content-Type: application/json' -d '{"username":"hx","password":"hbcpyx11"}' | jq -r '.data.token // empty') || true
+  ADMIN_TOKEN=$(curl -s -X POST "$USER_URL/api/users/adminlogin" -H 'Content-Type: application/json' -d "{\"username\":\"$ADMIN_USERNAME\",\"password\":\"$ADMIN_PASSWORD\"}" | jq -r '.data.token // empty') || true
   TOKEN=${ADMIN_TOKEN-}
 fi
 echo "TOKEN=${TOKEN:-<空>}"
@@ -108,13 +125,15 @@ DISH_PAYLOAD=$(cat <<EOF
 EOF
 )
 
-curl -s -X POST "$DISH_URL/api/dishes" -H 'Content-Type: application/json' -d "$DISH_PAYLOAD" | jq -r '.message, .data'
+DISH_RESP=$(curl -s -X POST "$GATEWAY_URL/api/dishes" -H "Content-Type: application/json" -H "Authorization: Bearer $TOKEN" -d "$DISH_PAYLOAD")
+DISH_ID=$(echo "$DISH_RESP" | jq -r '.data.id // empty')
+echo "DISH_ID=${DISH_ID}"
 
 sleep 1
-DISH_ID=$(curl -s "$DISH_URL/api/dishes/name/$DISH_NAME" | jq -r '.data.id // empty')
+
 if [ -z "$DISH_ID" ]; then
   # 尝试从 /api/dishes/all 查找最近的
-  DISH_ID=$(curl -s "$DISH_URL/api/dishes/all" | jq -r --arg name "$DISH_NAME" '.data[] | select(.dishname==$name) | .id' | head -n1)
+  DISH_ID=$(curl -s "$GATEWAY_URL/api/dishes/all" | jq -r --arg name "$DISH_NAME" '.data[] | select(.dishname==$name) | .id' | head -n1)
 fi
 echo "DISH_ID=${DISH_ID:-<未找到>}"
 
@@ -130,7 +149,7 @@ else
 }
 EOF
 )
-  curl -s -X POST "$ORDER_URL/api/orders" -H 'Content-Type: application/json' -d "$ORDER_PAYLOAD" | jq -r '.message, .data'
+  curl -s -X POST "$GATEWAY_URL/api/orders" -H "Content-Type: application/json" -H "Authorization: Bearer $TOKEN" -d "$ORDER_PAYLOAD" | jq -r '.message, .data'
 fi
 
 echo "--> 测试网关受保护接口（不带 token）"
@@ -143,7 +162,7 @@ if [ -n "${TOKEN-}" ]; then
   echo "--> 进行负载/轮询测试（10 次）"
   for i in {1..10}; do
     echo "请求 $i"
-    curl -s -X GET "$GATEWAY_URL/api/orders/admin/list" -H "Authorization: Bearer $TOKEN" | jq -r '.code, .message' || true
+    curl -s GET "$GATEWAY_URL/api/dishes/all" 
     sleep 0.2
   done
 else
@@ -155,18 +174,18 @@ curl -i -s -X OPTIONS "$GATEWAY_URL/api/orders/admin/list" || true
 
 echo "--> 测试菜品库存相关接口（增加/减少/设置）"
 if [ -n "$DISH_ID" ]; then
-  curl -s -X PUT "$DISH_URL/api/dishes/$DISH_ID/stock/add?addStock=5" | jq -r '.message, .data' || true
-  curl -s -X PUT "$DISH_URL/api/dishes/$DISH_ID/stock/reduce?reduceStock=2" | jq -r '.message, .data' || true
-  curl -s -X PUT "$DISH_URL/api/dishes/$DISH_ID/stock?stock=50" | jq -r '.message, .data' || true
+  curl -s -X PUT "$GATEWAY_URL/api/dishes/$DISH_ID/stock/add?addStock=5" -H "Authorization: Bearer $TOKEN" | jq -r '.message, .data' || true
+  curl -s -X PUT "$GATEWAY_URL/api/dishes/$DISH_ID/stock/reduce?reduceStock=2" -H "Authorization: Bearer $TOKEN" | jq -r '.message, .data' || true
+  curl -s -X PUT "$GATEWAY_URL/api/dishes/$DISH_ID/stock?stock=50" -H "Authorization: Bearer $TOKEN" | jq -r '.message, .data' || true
 fi
 
-echo "--> 清理：尝试删除测试数据（非强制成功）"
-if [ -n "$USER_ID" ]; then
-  curl -s -X DELETE "$USER_URL/api/users/$USER_ID" | jq -r '.message // empty' || true
-fi
-if [ -n "$DISH_ID" ]; then
-  curl -s -X DELETE "$DISH_URL/api/dishes?id=$DISH_ID" | jq -r '.message // empty' || true
-fi
+#echo "--> 清理：尝试删除测试数据（非强制成功）"
+#if [ -n "$USER_ID" ]; then
+#  curl -s -X DELETE "$USER_URL/api/users/$USER_ID" | jq -r '.message // empty' || true
+#fi
+#if [ -n "$DISH_ID" ]; then
+#  curl -s -X DELETE "$DISH_URL/api/dishes?id=$DISH_ID" | jq -r '.message // empty' || true
+#fi
 
 echo "===== 综合测试完成 ====="
 

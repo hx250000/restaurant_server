@@ -35,6 +35,7 @@ public class DishController {
      */
     @GetMapping("/all")
     public ApiResponse<List<Dish>> getAllDishes() {
+        System.out.println("Request handled by container: "+ System.getenv("HOSTNAME"));
         return ApiResponse.success(dishService.getAllDishes());
     }
 
