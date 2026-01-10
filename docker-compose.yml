@@ -120,7 +120,7 @@ services:
       dockerfile: Dockerfile
     #    container_name:
     ports:
-      - "8082"
+      - "8082:8082"
     environment:
       SPRING_PROFILES_ACTIVE: docker
       SPRING_DATASOURCE_URL: jdbc:mysql://r-dish-db:3306/restaurant_dish?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
@@ -144,7 +144,7 @@ services:
       dockerfile: Dockerfile
     #    container_name:
     ports:
-      - "8083"
+      - "8083:8083"
     environment:
       NACOS_HOST: nacos
       SPRING_PROFILES_ACTIVE: docker
@@ -206,23 +206,6 @@ services:
     networks:
       - restaurant-network
 
-  grafana:
-    image: grafana/grafana
-    container_name: grafana
-    environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-      - GF_INSTALL_PLUGINS=
-    volumes:
-      - grafana-data:/var/lib/grafana
-      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
-      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
-    ports:
-      - "3000:3000"
-    depends_on:
-      - prometheus
-    networks:
-      - restaurant-network
 
 networks:
   restaurant-network:
@@ -241,7 +224,5 @@ volumes:
   nacos-logs:
     driver: local
   prometheus-data:
-    driver: local
-  grafana-data:
     driver: local
 

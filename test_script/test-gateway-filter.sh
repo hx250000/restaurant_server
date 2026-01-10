@@ -16,8 +16,8 @@ echo "=============================="
 TOKEN=$(curl -s -X POST "$GATEWAY_URL/api/users/login" \
   -H "Content-Type: application/json" \
   -d '{
-        "username": "hx",
-        "password": "hbcpyx11"
+        "username": "admin",
+        "password": "adminpassword"
       }' | jq -r '.data.token')
 
 echo "TOKEN=$TOKEN"
@@ -39,7 +39,7 @@ echo "=============================="
 echo "4️⃣ 测试受保护接口（带 token）"
 echo "=============================="
 
-curl -i -X GET "$GATEWAY_URL/api/orders/admin/list" \
+curl -X GET "$GATEWAY_URL/api/dishes/test" \
   -H "Authorization: Bearer $TOKEN"
 
 echo
